@@ -1,0 +1,13 @@
+name: vulcan
+channels:
+  - conda-forge
+dependencies:
+  - python=3.9
+  - zarr
+  - dask
+  - numpy
+  - tqdm
+  - napari
+  - pytest
+  - pip
+  # openfib
