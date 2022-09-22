@@ -6,6 +6,18 @@ import yaml
 from pathlib import Path
 import os
 
+
+from enum import Enum
+
+
+class ChipLocation(Enum):
+    Centre = 1
+    TopLeft = 2
+    TopRight = 3
+    BottomLeft = 4
+    BottomRight = 5
+
+
 def load_profile(path: Path) -> np.ndarray:
 
     return np.load(path)

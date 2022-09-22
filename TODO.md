@@ -1,6 +1,10 @@
 
 @patrickcleeve2
 
+START_FROM:
+calibration page setuup
+movements
+
 DONE:
 
 show microscope settings

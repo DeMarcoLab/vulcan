@@ -47,176 +47,24 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="tab">
           <attribute name="title">
            <string>General</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_3">
-           <item row="9" column="2">
-            <widget class="QCheckBox" name="checkBox_profile_invert">
+           <item row="20" column="0" colspan="2">
+            <widget class="QLabel" name="label_milling_height">
              <property name="text">
-              <string>Invert</string>
+              <string>Height (um)</string>
              </property>
             </widget>
-           </item>
-           <item row="11" column="0" colspan="2">
-            <widget class="QLabel" name="label_milling_current">
-             <property name="text">
-              <string>Milling Current (A)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="15" column="0" colspan="2">
-            <widget class="QCheckBox" name="checkBox_surface_milling">
-             <property name="text">
-              <string>Apply Surface Milling</string>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="0" colspan="3">
-            <widget class="QLabel" name="label_profile_settings_header">
-             <property name="font">
-              <font>
-               <weight>75</weight>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>Profile Settings</string>
-             </property>
-            </widget>
-           </item>
-           <item row="17" column="0" colspan="2">
-            <widget class="QLabel" name="label_milling_surface_depth">
-             <property name="text">
-              <string>Surface Milling Depth (um)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="18" column="0" colspan="3">
-            <widget class="QPushButton" name="pushButton_update_milling_pattern">
-             <property name="text">
-              <string>Update Milling Pattern</string>
-             </property>
-            </widget>
-           </item>
-           <item row="8" column="0" colspan="3">
-            <widget class="QLabel" name="label_profile_loaded">
-             <property name="text">
-              <string>No Profile Loaded</string>
-             </property>
-            </widget>
-           </item>
-           <item row="20" column="0" colspan="3">
-            <spacer name="verticalSpacer">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
-             </property>
-            </spacer>
            </item>
            <item row="6" column="0" colspan="3">
             <widget class="QPushButton" name="pushButton_move_to_milling_angle">
              <property name="text">
               <string>Move to Milling Angle</string>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="0">
-            <widget class="QCheckBox" name="checkBox_profile_transpose">
-             <property name="text">
-              <string>Transpose</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="2">
-            <widget class="QLabel" name="label_system_application_file_value">
-             <property name="text">
-              <string>Placeholder</string>
-             </property>
-            </widget>
-           </item>
-           <item row="11" column="2">
-            <widget class="QComboBox" name="comboBox_milling_current"/>
-           </item>
-           <item row="13" column="2">
-            <widget class="QDoubleSpinBox" name="doubleSpinBox_milling_height">
-             <property name="maximum">
-              <double>1000.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>0.010000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0" colspan="2">
-            <widget class="QLabel" name="label_system_application_file">
-             <property name="text">
-              <string>Application File</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0" colspan="2">
-            <widget class="QLabel" name="label_stage_tilt_flat_to_ion">
-             <property name="text">
-              <string>Tilt Angle (Deg)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="10" column="0" colspan="3">
-            <widget class="QLabel" name="label_milling_header">
-             <property name="font">
-              <font>
-               <weight>75</weight>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>Milling Settings</string>
-             </property>
-            </widget>
-           </item>
-           <item row="9" column="1">
-            <widget class="QCheckBox" name="checkBox_profile_rotate">
-             <property name="text">
-              <string>Rotate</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0" colspan="2">
-            <widget class="QLabel" name="label_microscope_settings_header">
-             <property name="font">
-              <font>
-               <weight>75</weight>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>Microscope Settings</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="2">
-            <widget class="QLabel" name="label_stage_rotation_flat_to_ion_value">
-             <property name="text">
-              <string>TextLabel</string>
-             </property>
-            </widget>
-           </item>
-           <item row="12" column="2">
-            <widget class="QDoubleSpinBox" name="doubleSpinBox_milling_width">
-             <property name="maximum">
-              <double>1000.000000000000000</double>
-             </property>
-             <property name="singleStep">
-              <double>0.010000000000000</double>
              </property>
             </widget>
            </item>
@@ -227,28 +75,14 @@
              </property>
             </widget>
            </item>
-           <item row="13" column="0" colspan="2">
-            <widget class="QLabel" name="label_milling_height">
+           <item row="26" column="0" colspan="3">
+            <widget class="QLabel" name="label_milling_estimated_time">
              <property name="text">
-              <string>Height (um)</string>
+              <string>Estimated Time: 9999</string>
              </property>
             </widget>
            </item>
-           <item row="12" column="0" colspan="2">
-            <widget class="QLabel" name="label_milling_width">
-             <property name="text">
-              <string>Width (um)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="QLabel" name="label_system_plasma_gas">
-             <property name="text">
-              <string>Plasma Gas</string>
-             </property>
-            </widget>
-           </item>
-           <item row="17" column="2">
+           <item row="24" column="2">
             <widget class="QDoubleSpinBox" name="doubleSpinBox_milling_surface_depth">
              <property name="maximum">
               <double>1000.000000000000000</double>
@@ -265,6 +99,13 @@
              </property>
             </widget>
            </item>
+           <item row="8" column="2">
+            <widget class="QLabel" name="label_chip_material_value">
+             <property name="text">
+              <string>Material</string>
+             </property>
+            </widget>
+           </item>
            <item row="1" column="2">
             <widget class="QLabel" name="label_system_plasma_gas_value">
              <property name="text">
@@ -272,7 +113,64 @@
              </property>
             </widget>
            </item>
-           <item row="14" column="2">
+           <item row="9" column="2">
+            <widget class="QLabel" name="label_chip_width_value">
+             <property name="text">
+              <string>TextLabel</string>
+             </property>
+            </widget>
+           </item>
+           <item row="14" column="0" colspan="3">
+            <widget class="QLabel" name="label_profile_loaded">
+             <property name="text">
+              <string>No Profile Loaded</string>
+             </property>
+            </widget>
+           </item>
+           <item row="19" column="2">
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_milling_width">
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.010000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="28" column="0" colspan="3">
+            <spacer name="verticalSpacer">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="17" column="0" colspan="3">
+            <widget class="QLabel" name="label_milling_header">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Milling Settings</string>
+             </property>
+            </widget>
+           </item>
+           <item row="22" column="0" colspan="2">
+            <widget class="QCheckBox" name="checkBox_surface_milling">
+             <property name="text">
+              <string>Apply Surface Milling</string>
+             </property>
+            </widget>
+           </item>
+           <item row="21" column="2">
             <widget class="QDoubleSpinBox" name="doubleSpinBox_milling_depth">
              <property name="maximum">
               <double>1000.000000000000000</double>
@@ -282,17 +180,191 @@
              </property>
             </widget>
            </item>
-           <item row="14" column="0" colspan="2">
+           <item row="16" column="0">
+            <widget class="QCheckBox" name="checkBox_profile_invert">
+             <property name="text">
+              <string>Invert</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0" colspan="2">
+            <widget class="QLabel" name="label_system_application_file">
+             <property name="text">
+              <string>Application File</string>
+             </property>
+            </widget>
+           </item>
+           <item row="13" column="0" colspan="3">
+            <widget class="QLabel" name="label_profile_settings_header">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Profile Settings</string>
+             </property>
+            </widget>
+           </item>
+           <item row="27" column="0" colspan="3">
+            <widget class="QPushButton" name="pushButton_run_milling">
+             <property name="text">
+              <string>Run Milling</string>
+             </property>
+            </widget>
+           </item>
+           <item row="21" column="0" colspan="2">
             <widget class="QLabel" name="label_milling_depth">
              <property name="text">
               <string>Depth (um)</string>
              </property>
             </widget>
            </item>
-           <item row="19" column="0" colspan="3">
-            <widget class="QPushButton" name="pushButton_run_milling">
+           <item row="7" column="0" colspan="3">
+            <widget class="QLabel" name="label_chip_header">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
              <property name="text">
-              <string>Run Milling</string>
+              <string>Chip Settings</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QLabel" name="label_system_application_file_value">
+             <property name="text">
+              <string>Placeholder</string>
+             </property>
+            </widget>
+           </item>
+           <item row="15" column="0">
+            <widget class="QCheckBox" name="checkBox_profile_transpose">
+             <property name="text">
+              <string>Transpose</string>
+             </property>
+            </widget>
+           </item>
+           <item row="20" column="2">
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_milling_height">
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.010000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" colspan="2">
+            <widget class="QLabel" name="label_stage_tilt_flat_to_ion">
+             <property name="text">
+              <string>Tilt Angle (Deg)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="0">
+            <widget class="QLabel" name="label_chip_width">
+             <property name="text">
+              <string>Width (m)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="15" column="1">
+            <widget class="QCheckBox" name="checkBox_profile_rotate">
+             <property name="text">
+              <string>Rotate</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="2">
+            <widget class="QLabel" name="label_system_plasma_gas">
+             <property name="text">
+              <string>Plasma Gas</string>
+             </property>
+            </widget>
+           </item>
+           <item row="24" column="0" colspan="2">
+            <widget class="QLabel" name="label_milling_surface_depth">
+             <property name="text">
+              <string>Surface Milling Depth (um)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="19" column="0" colspan="2">
+            <widget class="QLabel" name="label_milling_width">
+             <property name="text">
+              <string>Width (um)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0">
+            <widget class="QLabel" name="label_chip_material">
+             <property name="text">
+              <string>Material</string>
+             </property>
+            </widget>
+           </item>
+           <item row="25" column="0" colspan="3">
+            <widget class="QPushButton" name="pushButton_update_milling_pattern">
+             <property name="text">
+              <string>Update Milling Pattern</string>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="2">
+            <widget class="QLabel" name="label_chip_height_value">
+             <property name="text">
+              <string>TextLabel</string>
+             </property>
+            </widget>
+           </item>
+           <item row="18" column="0" colspan="2">
+            <widget class="QLabel" name="label_milling_current">
+             <property name="text">
+              <string>Milling Current (A)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="2">
+            <widget class="QLabel" name="label_stage_rotation_flat_to_ion_value">
+             <property name="text">
+              <string>TextLabel</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0" colspan="3">
+            <widget class="QLabel" name="label_microscope_settings_header">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Microscope Settings</string>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="0">
+            <widget class="QLabel" name="label_chip_height">
+             <property name="text">
+              <string>Height (m)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="18" column="2">
+            <widget class="QComboBox" name="comboBox_milling_current"/>
+           </item>
+           <item row="12" column="0">
+            <widget class="QComboBox" name="comboBox_chip_location"/>
+           </item>
+           <item row="12" column="1" colspan="2">
+            <widget class="QPushButton" name="pushButton_move_to_chip_location">
+             <property name="text">
+              <string>Move to Chip Location</string>
              </property>
             </widget>
            </item>
@@ -303,10 +375,102 @@
            <string>Calibration</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_4">
+           <item row="6" column="1">
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_calibration_spacing">
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="0">
             <widget class="QLabel" name="label_calibration_header">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
              <property name="text">
-              <string>TODO</string>
+              <string>Chip Location Calibration</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_calibration_spacing">
+             <property name="text">
+              <string>Pattern Spacing (um)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_calibration_depth">
+             <property name="text">
+              <string>Depth Per Step (um)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="1">
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_calibration_steps"/>
+           </item>
+           <item row="5" column="1">
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_calibration_depth">
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_calibration_steps">
+             <property name="text">
+              <string>Number of Steps</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" colspan="2">
+            <widget class="QPushButton" name="pushButton_calibration_set_edge_location">
+             <property name="text">
+              <string>Set Edge Location</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_calibration_milling_header">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Milling Depth Calibration</string>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="0" colspan="2">
+            <widget class="QPushButton" name="pushButton_calibration_run_milling">
+             <property name="text">
+              <string>Run Milling Calibration</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="2">
+            <widget class="QPushButton" name="pushButton_calibration_set_chip_location">
+             <property name="text">
+              <string>Set TopLeft Corner Location</string>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="0" colspan="2">
+            <widget class="QPushButton" name="pushButton_calibration_update_milling_pattern">
+             <property name="text">
+              <string>PushButton</string>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0" colspan="2">
+            <widget class="QLabel" name="label_calibration_estimated_time">
+             <property name="text">
+              <string>Estimated Time: 9999</string>
              </property>
             </widget>
            </item>

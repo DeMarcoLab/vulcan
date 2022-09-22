@@ -1,11 +1,11 @@
 
+import logging
 import os
 import sys
 from pprint import pprint
-import logging
+
 import napari
 import napari.utils.notifications
-import pandas as pd
 import vulcan
 import vulcan.ui.qtdesigner_files.VulcanUI as VulcanUI
 import yaml
@@ -14,16 +14,19 @@ from PyQt5 import QtWidgets
 BASE_PATH = os.path.dirname(vulcan.__file__)
 import os
 import traceback
+from pathlib import Path
 from pprint import pprint
 
-import matplotlib.pyplot as plt
 import numpy as np
 from autoscript_sdb_microscope_client.structures import (
     BitmapPatternDefinition, StagePosition)
 from fibsem import acquire, constants, milling, movement
 from fibsem import utils as fibsem_utils
+from fibsem.structures import BeamType
 from vulcan import utils
-from pathlib import Path
+
+from vulcan.utils import ChipLocation
+
 
 class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
     def __init__(self, parent=None, viewer: napari.Viewer = None):
@@ -56,9 +59,10 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         self.actionSave_Configuration.triggered.connect(self.save_configuration)
 
         # buttons
-        self.pushButton_run_milling.clicked.connect(self.run_milling)
-        self.pushButton_update_milling_pattern.clicked.connect(self.update_milling_pattern)
         self.pushButton_move_to_milling_angle.clicked.connect(self.move_to_milling_angle)
+        self.pushButton_move_to_chip_location.clicked.connect(self.move_to_chip_location)
+        self.pushButton_update_milling_pattern.clicked.connect(self.update_milling_pattern)
+        self.pushButton_run_milling.clicked.connect(self.run_milling)
         
 
         # spinbox
@@ -74,9 +78,12 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         self.checkBox_profile_rotate.toggled.connect(self.update_ui_display)
 
         # combobox
-        milling_currents = [20e-12, 60e-12, 0.74e-9, 5.6e-9, 24e-9, 60e-9, 200e-9, 500e-9]
+        milling_currents = [20e-12, 60e-12, 0.74e-9, 5.6e-9, 24e-9, 60e-9, 200e-9, 500e-9] # TODO; get actual currents from microscope
         self.comboBox_milling_current.addItems([f"{current:.3e}" for current in milling_currents])
         self.comboBox_milling_current.currentTextChanged.connect(self.update_ui)
+
+        self.comboBox_chip_location.addItems([location.name for location in ChipLocation])
+
 
     def load_profile(self, profile_filename: Path = None):
         logging.info("load profile")
@@ -171,7 +178,9 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
             self.label_stage_rotation_flat_to_ion_value.setText(str(self.settings.system.stage.rotation_flat_to_ion))
 
             # chip
-            # TODO:
+            self.label_chip_material_value.setText(str(self.settings.protocol["chip"]["material"]))
+            self.label_chip_width_value.setText(f'{self.settings.protocol["chip"]["width"]:.2e}')
+            self.label_chip_height_value.setText(f'{self.settings.protocol["chip"]["height"]:.2e}')
 
             # profile
             self.checkBox_profile_invert.setChecked(bool(self.settings.protocol["profile"]["invert"]))
@@ -197,9 +206,20 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         self.USER_UPDATE = True
 
 
+    def move_to_chip_location(self):
+
+        chip_location = ChipLocation[self.comboBox_chip_location.currentText()]
+        logging.info(f"move to chip location: {chip_location}")
+
+        # TODO: actual movements...
+        # movement.
+
+
+
     def move_to_milling_angle(self):
 
         logging.info("move to milling angle")  
+        # movement.move_flat_to_beam(self.microscope, beam_type=BeamType.ION)
 
     def run_milling(self):
 
@@ -241,6 +261,8 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         # bitmap_pattern = BitmapPatternDefinition()
         # bitmap_pattern.points = utils.convert_profile_to_bmp(profile)
 
+
+        # milling parameters
         width = self.doubleSpinBox_milling_width.value() * constants.MICRON_TO_METRE
         height = self.doubleSpinBox_milling_height.value() * constants.MICRON_TO_METRE
         depth = self.doubleSpinBox_milling_depth.value() * constants.MICRON_TO_METRE
@@ -259,6 +281,8 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         #         height= width,
         #         depth=  surface_depth
         #     )
+        # else: 
+        #     surface_pattern = None
 
         # # profile pattern
         # pattern  = self.microscope.patterning.create_bitmap(
@@ -273,6 +297,11 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         # need an ion image...
         # display milling time
         # change current before hand
+
+        # estimated_time = pattern.time()
+        # if surface_pattern:
+        #     estimated_time += surface_pattern.time()
+
 
 
 
