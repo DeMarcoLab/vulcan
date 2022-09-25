@@ -62,7 +62,6 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
 
 
     def setup_connections(self):
-        logging.info("setup connections")
 
         # actions
         self.actionLoad_Profile.triggered.connect(self.load_profile)
@@ -90,6 +89,7 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
 
         # combobox
         milling_currents = [20e-12, 60e-12, 0.74e-9, 5.6e-9, 24e-9, 60e-9, 200e-9, 500e-9] # TODO; get actual currents from microscope
+        # milling_currents = [current for current in self.microscope.beams.ion_beam.beam_current.available_values()]
         self.comboBox_milling_current.addItems([f"{current:.3e}" for current in milling_currents])
         self.comboBox_milling_current.currentTextChanged.connect(self.update_ui)
 
@@ -103,7 +103,6 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
 
 
     def load_profile(self, profile_filename: Path = None):
-        logging.info("load profile")
 
         # get file from user
         if profile_filename is None:
@@ -132,8 +131,6 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
 
 
     def load_configuration(self):
-        logging.info("load configuration pressed")
-
 
         config_filename, _ = QtWidgets.QFileDialog.getOpenFileName(
             self,
@@ -154,38 +151,54 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
 
     def save_configuration(self):
 
-        logging.info("save configuration pressed")
-
-        return NotImplemented
-
         try:
-            self.update_config_from_ui()
+            protocol = self.update_config_from_ui()
         except Exception as e:
-            napari.utils.notifications(f"Unable to update config... {e}")
+            napari.utils.notifications(f"Unable to update config... {traceback.format_exc()}")
             return
 
-        config_filename, ext = QtWidgets.QFileDialog.getSaveFileName(self, "Save Configuration", "config.yaml", filter="Yaml config (*.yml *.yaml)")
+        config_filename, ext = QtWidgets.QFileDialog.getSaveFileName(self, 
+            caption="Save Configuration", 
+            directory=os.path.join(BASE_PATH, "protocol.yaml"), 
+            filter="Yaml config (*.yml *.yaml)")
 
         if config_filename == "":
             napari.utils.notifications.show_warning(f"No filename entered. Configuration was not saved.")
             return
 
         with open(config_filename, "w") as f:
-            yaml.safe_dump(self.config, f, sort_keys=False)
+            yaml.safe_dump(protocol, f, sort_keys=False)
 
         napari.utils.notifications.show_info(f"Configuration saved successfully ({config_filename}).")
 
 
     def update_config_from_ui(self):
 
-        logging.info("update config from ui")
+        protocol = {}
 
-        self.config = {}
+        # chip
+        protocol["chip"] = self.settings.protocol["chip"]
+
+        # profile
+        protocol["profile"] = {}
+        protocol["profile"]["path"] = self.profile_filename
+        protocol["profile"]["invert"] = self.checkBox_profile_invert.isChecked() 
+        protocol["profile"]["transpose"] = self.checkBox_profile_transpose.isChecked()
+        protocol["profile"]["rotate"] = self.checkBox_profile_rotate.isChecked()
+
+        # milling
+        protocol["milling"] = {}
+        protocol["milling"]["milling_current"] = float(self.comboBox_milling_current.currentText())
+        protocol["milling"]["width"] = float(self.doubleSpinBox_milling_width.value()) * constants.MICRON_TO_METRE
+        protocol["milling"]["height"] = float(self.doubleSpinBox_milling_height.value()) * constants.MICRON_TO_METRE
+        protocol["milling"]["depth"] = float(self.doubleSpinBox_milling_depth.value()) * constants.MICRON_TO_METRE
+        protocol["milling"]["surface_depth"] = float(self.doubleSpinBox_milling_surface_depth.value()) * constants.MICRON_TO_METRE
+
+        return protocol
        
     def update_ui_from_config(self):
 
         logging.info("update ui from config")
-        self.USER_UPDATE = False
 
         try:
             # system
@@ -219,9 +232,6 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
 
         except:
             napari.utils.notifications.show_error(f"Unable to update ui from config: {traceback.format_exc()}")
-
-        self.USER_UPDATE = True
-
 
     def move_to_chip_location(self):
 
@@ -264,7 +274,7 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         stage_position = StagePosition(x=dx, y=dy)
         # self.microscope.specimen.stage.relative_move(stage_position)
 
-        # TODO: check if this is required / works 
+        # TODO: check if this is required / works. think we can just use above
         # movement.move_stage_relative_with_corrected_movement(self.microscope, self.settings, dx=dx, dy=dy, beam_type=BeamType.ION)
 
         logging.info(f"Location: {chip_location.name}. movement: {stage_position}")
@@ -272,8 +282,6 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
 
         # TODO: edge detection
         # TODO: offset movements
-
-
 
     def move_to_milling_angle(self):
 
@@ -319,42 +327,31 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         height = self.doubleSpinBox_milling_height.value() * constants.MICRON_TO_METRE
         depth = self.doubleSpinBox_milling_depth.value() * constants.MICRON_TO_METRE
         surface_depth = self.doubleSpinBox_milling_surface_depth.value() * constants.MICRON_TO_METRE
-
         surface_milling_enabled = self.checkBox_surface_milling.isChecked()
 
 
         # self.microscope.patterning.clear_patterns()
+        patterns = []
 
-        # # surface milling
-        # if surface_milling_enabled:
-        #     surface_pattern = self.microscope.patterning.create_rectangle(
-        #         center_x=0, center_y=0,
-        #         width = width,
-        #         height= width,
-        #         depth=  surface_depth
-        #     )
-        # else: 
-        #     surface_pattern = None
+        # surface milling
+        if surface_milling_enabled:
+            mill_settings = MillingSettings(width=width, height=height, depth=surface_depth)
+            surface_pattern = milling._draw_rectangle_pattern_v2(self.microscope, mill_settings)
+            patterns.append(surface_pattern)
 
-        # # profile pattern
-        # pattern  = self.microscope.patterning.create_bitmap(
-        #     center_x=0, center_y=0,
-        #     width=width,    # length
-        #     height=height,  # diameter
-        #     depth=depth,    # height
-        #     bitmap_pattern_definition=bitmap_pattern,
-        # )
+        # profile pattern
+        mill_settings = MillingSettings(width =width, height=height, depth=depth)
+        pattern = milling._draw_bitmap_pattern(self.microscope, mill_settings, bitmap_pattern)
+        patterns.append(pattern)
 
         # TODO: show the milling patterns in napari...
         # need an ion image...
         # display milling time
         # change current before hand
 
-        # estimated_time = pattern.time()
-        # if surface_pattern:
-        #     estimated_time += surface_pattern.time()
-
-
+        # estimated_time = sum([pattern.time for pattern in patterns])
+        estimated_time = 987654321
+        self.label_milling_estimated_time.setText(f"Estimated Time: {estimated_time}")
 
 
     def update_ui_display(self):
@@ -403,38 +400,15 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         spacing = self.doubleSpinBox_calibration_spacing.value() * constants.MICRON_TO_METRE
 
         logging.info(f"steps: {n_steps}, depth per step: {depth:.2e}, spacing: {spacing:.2e}")
+        
+        # TODO: set calibration pattern size?
+        self.microscope.patterning.clear_patterns()
 
-        # TODO: set calibration size?
-        width, height = 10e-6, 10e-6
-        centre_x, centre_y = 0, 0
+        mill_settings = MillingSettings(width=10e-6, height=10e-6, depth=depth) 
+        patterns = utils._draw_calibration_patterns(self.microscope, mill_settings, 
+                    n_steps=n_steps, offset=spacing)
 
-
-        patterns = []
-        estimated_time = 0
-
-        # self.microscope.patterning.clear_patterns()
-
-        for i in range(1, n_steps+1):
-
-
-            mill_settings = MillingSettings(
-                width=width, 
-                height=height, 
-                depth=depth*i, 
-                centre_x=centre_x,
-                centre_y=centre_y
-            )
-
-            # pattern = milling._draw_rectangle_pattern_v2(self.microscope, mill_settings)
-            # estimated_time += pattern.time()
-            # patterns.append(pattern)
-
-            logging.info(f"Step: {i}: settings: {mill_settings}")
-
-            # update for next pattern
-            centre_y = centre_y + height + spacing
-
-        estimated_time = 1234567
+        estimated_time = sum([pattern.time for pattern in patterns])
         self.label_calibration_estimated_time.setText(f"Estimated Time: {estimated_time}")
 
 

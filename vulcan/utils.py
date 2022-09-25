@@ -6,7 +6,7 @@ import yaml
 from pathlib import Path
 import os
 
-
+from autoscript_sdb_microscope_client import SdbMicroscopeClient
 from enum import Enum
 
 
@@ -60,3 +60,23 @@ def save_profile_to_bmp(arr: np.ndarray, path: Path = "profile.bmp"):
     # convert to bmp, save
     os.makedirs(os.path.dirname(path), exist_ok=True)
     img.save(path)
+
+import logging
+from fibsem.structures import MillingSettings
+from fibsem import milling
+def _draw_calibration_patterns(microscope: SdbMicroscopeClient, mill_settings: MillingSettings, n_steps: int = 1 , offset: float = 10e-6) -> list:
+    
+    patterns = []
+
+    for i in range(n_steps):
+
+        logging.info(f"Step: {i}: settings: {mill_settings}")
+        
+        pattern = milling._draw_rectangle_pattern_v2(microscope, mill_settings)
+        patterns.append(pattern)
+
+        # update for next pattern
+        mill_settings.depth += mill_settings.depth
+        mill_settings.centre_y = mill_settings.centre_y + mill_settings.height / 2 + offset
+
+    return patterns 
