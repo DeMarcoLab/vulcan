@@ -2,8 +2,7 @@
 @patrickcleeve2
 
 START_FROM:
-calibration page setuup
-movements
+- turn on microscope ops
 
 DONE:
 
@@ -19,6 +18,11 @@ options to transpose, invert? Dont think we need transpose?
 invert profile
 convert to bmp
 
+set top left corner position
+move to corner
+move to centre
+
+
 TODO:
 
 set milling position
@@ -28,11 +32,8 @@ take ion image
 change to milling current on setup 
 run milling
 
-
-set top left corner position
-move to corner
-move to centre
-
+offset movement
+corner edge detection
 
 stitching
 
@@ -41,7 +42,6 @@ calibration
 - run calibration pattern
 - move to edge, milling multiple rectangles at different depths, see how deep they go, fit the actual sputtering rate / depth
 - actually set to an application file??
-
 
 STRETCH: 
     - 3d profiles
