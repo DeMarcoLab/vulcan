@@ -20,9 +20,9 @@ from pprint import pprint
 import numpy as np
 from autoscript_sdb_microscope_client.structures import (
     BitmapPatternDefinition, StagePosition)
-from fibsem import acquire, constants, milling, movement
+from fibsem import acquire, constants, milling, movement, calibration
 from fibsem import utils as fibsem_utils
-from fibsem.structures import BeamType
+from fibsem.structures import BeamType, MillingSettings
 from vulcan import utils
 
 from vulcan.utils import ChipLocation
@@ -48,6 +48,17 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
 
         # update ui
         self.update_ui_from_config()
+
+        # setup milling
+        # milling.setup_milling(
+        #     self.microscope, 
+        #     application_file=self.settings.system.application_file,
+        #     hfw=900e-6
+        # )
+
+        # calibration
+        self.calibrated_state = None
+
 
 
     def setup_connections(self):
@@ -83,6 +94,12 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         self.comboBox_milling_current.currentTextChanged.connect(self.update_ui)
 
         self.comboBox_chip_location.addItems([location.name for location in ChipLocation])
+
+        # calibration
+        self.pushButton_calibration_set_chip_location.clicked.connect(self.set_calibrated_state)
+        self.pushButton_calibration_set_edge_location.clicked.connect(self.set_edge_calibration_position)
+        self.pushButton_calibration_update_milling_pattern.clicked.connect(self.update_calibration_milling_pattern)
+        self.pushButton_calibration_run_milling.clicked.connect(self.run_milling)
 
 
     def load_profile(self, profile_filename: Path = None):
@@ -121,7 +138,7 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         config_filename, _ = QtWidgets.QFileDialog.getOpenFileName(
             self,
             "Load Configuration",
-            filter="All types (*.yml *.yaml) ;;Yaml config (*.yml *.yaml) ;;",
+            filter="Yaml config (*.yml *.yaml);;",
         )
 
         if config_filename == "":
@@ -129,7 +146,7 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
             return
 
         try:
-            self.config = utils.load_config(config_filename)
+            self.settings.protocol = fibsem_utils.load_protocol(config_filename)
             self.update_ui_from_config()
 
         except Exception as e:
@@ -210,31 +227,66 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
 
         chip_location = ChipLocation[self.comboBox_chip_location.currentText()]
         logging.info(f"move to chip location: {chip_location}")
+        
+        if self.calibrated_state is None:
+            napari.utils.notifications.show_warning(f"Unable to move to {chip_location.name}. Please set the TopLeft calibrated position in the calibration tab.")
+            # return
 
-        # TODO: actual movements...
-        # movement.
+        # chip dimensions
+        chip_width = self.settings.protocol["chip"]["width"]
+        chip_height = self.settings.protocol["chip"]["height"]
+
+
+        # move to top left corner
+        # calibration.set_microscope_state(self.microscope, self.calibrated_state)    
+    
+        # top left: nothing
+        if chip_location is ChipLocation.TopLeft:
+            dx, dy = 0, 0
+        
+        # top right x+= w
+        if chip_location is ChipLocation.TopRight:
+            dx, dy = chip_width, 0 
+        
+        # bottom left: y+= h
+        if chip_location is ChipLocation.BottomLeft:
+            dx, dy = 0, chip_height
+        
+        # bottom right: x+=w, y+=h
+        if chip_location is ChipLocation.BottomRight:
+            dx, dy = chip_width, chip_height
+
+        # centre: x+=w/2, y+=h/2
+        if chip_location is ChipLocation.Centre:
+            dx, dy = chip_width / 2, chip_height / 2
+
+        # relative stage move
+        stage_position = StagePosition(x=dx, y=dy)
+        # self.microscope.specimen.stage.relative_move(stage_position)
+
+        # TODO: check if this is required / works 
+        # movement.move_stage_relative_with_corrected_movement(self.microscope, self.settings, dx=dx, dy=dy, beam_type=BeamType.ION)
+
+        logging.info(f"Location: {chip_location.name}. movement: {stage_position}")
+
+
+        # TODO: edge detection
+        # TODO: offset movements
 
 
 
     def move_to_milling_angle(self):
 
         logging.info("move to milling angle")  
-        # movement.move_flat_to_beam(self.microscope, beam_type=BeamType.ION)
+        # movement.move_flat_to_beam(self.microscope, self.settings, beam_type=BeamType.ION)
 
     def run_milling(self):
 
         logging.info("run milling pressed")
 
-        # TODO: maybe move this somewhere else?
-        # milling setup
-        # milling.setup_milling(
-        #     self.microscope, 
-        #     application_file=self.settings.system.application_file,
-        #     hfw=900e-6
-        # )
-
         milling_current = float(self.comboBox_milling_current.currentText())
         # milling.run_milling(self.microscope, milling_current, asynchronous = False)
+        logging.info(f"milling_current: {milling_current}")
 
 
     def update_ui(self):
@@ -319,7 +371,7 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
     def apply_transfrom_profile(self) -> np.ndarray:
         # apply users profile transformations
 
-        invert_profile = self.checkBox_profile_invert.isChecked()
+        invert_profile = int(self.checkBox_profile_invert.isChecked())
         transpose_profile = self.checkBox_profile_transpose.isChecked()
         rotate_profile = self.checkBox_profile_rotate.isChecked()
 
@@ -331,12 +383,66 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         return profile
 
 
+    ### CALIBRATION
+    def set_calibrated_state(self):
+        logging.info("set calibrated position")
+
+        # self.calibrated_state = calibration.get_current_microscope_state(self.microscope)
+
+
+    def set_edge_calibration_position(self):
+        logging.info(f"set edge calibration position")
+
+        # self.edge_calibration_position = calibration.get_current_microscope_state(self.microscope)
+
+    def update_calibration_milling_pattern(self):
+        logging.info(f"update calibration milling pattern")
+
+        n_steps = self.spinBox_calibration_steps.value() 
+        depth = self.doubleSpinBox_calibration_depth.value() * constants.MICRON_TO_METRE
+        spacing = self.doubleSpinBox_calibration_spacing.value() * constants.MICRON_TO_METRE
+
+        logging.info(f"steps: {n_steps}, depth per step: {depth:.2e}, spacing: {spacing:.2e}")
+
+        # TODO: set calibration size?
+        width, height = 10e-6, 10e-6
+        centre_x, centre_y = 0, 0
+
+
+        patterns = []
+        estimated_time = 0
+
+        # self.microscope.patterning.clear_patterns()
+
+        for i in range(1, n_steps+1):
+
+
+            mill_settings = MillingSettings(
+                width=width, 
+                height=height, 
+                depth=depth*i, 
+                centre_x=centre_x,
+                centre_y=centre_y
+            )
+
+            # pattern = milling._draw_rectangle_pattern_v2(self.microscope, mill_settings)
+            # estimated_time += pattern.time()
+            # patterns.append(pattern)
+
+            logging.info(f"Step: {i}: settings: {mill_settings}")
+
+            # update for next pattern
+            centre_y = centre_y + height + spacing
+
+        estimated_time = 1234567
+        self.label_calibration_estimated_time.setText(f"Estimated Time: {estimated_time}")
+
+
 def main():
     application = QtWidgets.QApplication([])
     viewer = napari.Viewer(ndisplay=2)
     vulcan_ui = VulcanUI(viewer=viewer)                                          
     viewer.window.add_dock_widget(vulcan_ui, area='right')                  
-
     sys.exit(application.exec_())
 
 
