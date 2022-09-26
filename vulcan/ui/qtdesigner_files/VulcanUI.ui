@@ -47,7 +47,7 @@
           </size>
          </property>
          <property name="currentIndex">
-          <number>0</number>
+          <number>1</number>
          </property>
          <widget class="QWidget" name="tab">
           <attribute name="title">
@@ -375,98 +375,30 @@
            <string>Calibration</string>
           </attribute>
           <layout class="QGridLayout" name="gridLayout_4">
-           <item row="8" column="0" colspan="2">
-            <widget class="QLabel" name="label_calibration_estimated_time">
-             <property name="text">
-              <string>Estimated Time: 9999</string>
-             </property>
-            </widget>
-           </item>
-           <item row="5" column="0">
-            <widget class="QLabel" name="label_calibration_depth">
-             <property name="text">
-              <string>Depth Per Step (um)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="3" column="0" colspan="2">
-            <widget class="QPushButton" name="pushButton_calibration_set_edge_location">
-             <property name="text">
-              <string>Set Edge Location</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="1">
-            <widget class="QDoubleSpinBox" name="doubleSpinBox_calibration_spacing">
-             <property name="singleStep">
-              <double>0.100000000000000</double>
-             </property>
-            </widget>
-           </item>
-           <item row="7" column="0" colspan="2">
-            <widget class="QPushButton" name="pushButton_calibration_update_milling_pattern">
-             <property name="text">
-              <string>Update Milling Pattern</string>
-             </property>
-            </widget>
-           </item>
-           <item row="6" column="0">
-            <widget class="QLabel" name="label_calibration_spacing">
-             <property name="text">
-              <string>Pattern Spacing (um)</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_calibration_header">
-             <property name="font">
-              <font>
-               <weight>75</weight>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>Chip Location Calibration</string>
-             </property>
-            </widget>
-           </item>
-           <item row="2" column="0">
-            <widget class="QLabel" name="label_calibration_milling_header">
-             <property name="font">
-              <font>
-               <weight>75</weight>
-               <bold>true</bold>
-              </font>
-             </property>
-             <property name="text">
-              <string>Milling Depth Calibration</string>
-             </property>
-            </widget>
-           </item>
-           <item row="10" column="0" colspan="2">
+           <item row="12" column="0" colspan="2">
             <widget class="QPushButton" name="pushButton_calibration_run_milling">
              <property name="text">
               <string>Run Milling Calibration</string>
              </property>
             </widget>
            </item>
-           <item row="5" column="1">
-            <widget class="QDoubleSpinBox" name="doubleSpinBox_calibration_depth">
-             <property name="minimum">
-              <double>10.000000000000000</double>
+           <item row="13" column="0" colspan="2">
+            <spacer name="verticalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
              </property>
-             <property name="maximum">
-              <double>1000.000000000000000</double>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>40</height>
+              </size>
              </property>
-             <property name="singleStep">
-              <double>0.100000000000000</double>
-             </property>
-            </widget>
+            </spacer>
            </item>
-           <item row="1" column="0" colspan="2">
-            <widget class="QPushButton" name="pushButton_calibration_set_chip_location">
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_2">
              <property name="text">
-              <string>Set TopLeft Corner Location</string>
+              <string>Width (um)</string>
              </property>
             </widget>
            </item>
@@ -484,18 +416,129 @@
              </property>
             </widget>
            </item>
-           <item row="11" column="0" colspan="2">
-            <spacer name="verticalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
+           <item row="7" column="0">
+            <widget class="QLabel" name="label_calibration_depth">
+             <property name="text">
+              <string>Depth Per Step (um)</string>
              </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>40</height>
-              </size>
+            </widget>
+           </item>
+           <item row="8" column="1">
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_calibration_spacing">
+             <property name="singleStep">
+              <double>0.100000000000000</double>
              </property>
-            </spacer>
+             <property name="value">
+              <double>10.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="8" column="0">
+            <widget class="QLabel" name="label_calibration_spacing">
+             <property name="text">
+              <string>Pattern Spacing (um)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0" colspan="2">
+            <widget class="QPushButton" name="pushButton_calibration_set_chip_location">
+             <property name="text">
+              <string>Set TopLeft Corner Location</string>
+             </property>
+            </widget>
+           </item>
+           <item row="10" column="0" colspan="2">
+            <widget class="QLabel" name="label_calibration_estimated_time">
+             <property name="text">
+              <string>Estimated Time: 9999</string>
+             </property>
+            </widget>
+           </item>
+           <item row="9" column="0" colspan="2">
+            <widget class="QPushButton" name="pushButton_calibration_update_milling_pattern">
+             <property name="text">
+              <string>Update Milling Pattern</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0" colspan="2">
+            <widget class="QPushButton" name="pushButton_calibration_set_edge_location">
+             <property name="text">
+              <string>Set Calibration Location</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_calibration_milling_header">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Milling Depth Calibration</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_calibration_header">
+             <property name="font">
+              <font>
+               <weight>75</weight>
+               <bold>true</bold>
+              </font>
+             </property>
+             <property name="text">
+              <string>Chip Location Calibration</string>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="0">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Height (um)</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="1">
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_calibration_width">
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+             <property name="value">
+              <double>10.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="6" column="1">
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_calibration_height">
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+             <property name="value">
+              <double>10.000000000000000</double>
+             </property>
+            </widget>
+           </item>
+           <item row="7" column="1">
+            <widget class="QDoubleSpinBox" name="doubleSpinBox_calibration_depth">
+             <property name="maximum">
+              <double>1000.000000000000000</double>
+             </property>
+             <property name="singleStep">
+              <double>0.100000000000000</double>
+             </property>
+             <property name="value">
+              <double>10.000000000000000</double>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>

@@ -1,7 +1,7 @@
 name: vulcan_demo
 
 profile: 
-  path: C:\Users\pcle0002\Documents\repos\vulcan\vulcan\profiles\lens_lowres_half.npy
+  path: C:\Users\Admin\Github\vulcan\vulcan\profiles\lens_lowres_half.npy
   invert: True
   transpose: False
   rotate: False

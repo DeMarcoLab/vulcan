@@ -20,11 +20,10 @@ from pprint import pprint
 import numpy as np
 from autoscript_sdb_microscope_client.structures import (
     BitmapPatternDefinition, StagePosition)
-from fibsem import acquire, constants, milling, movement, calibration
+from fibsem import acquire, calibration, constants, milling, movement
 from fibsem import utils as fibsem_utils
 from fibsem.structures import BeamType, MillingSettings
 from vulcan import utils
-
 from vulcan.utils import ChipLocation
 
 
@@ -35,7 +34,6 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
 
         self.setWindowTitle("Vulcan UI")
         self.viewer = viewer
-        self.USER_UPDATE = True
         self.base_profile = None
 
         # microscope, settings
@@ -50,16 +48,14 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         self.update_ui_from_config()
 
         # setup milling
-        # milling.setup_milling(
-        #     self.microscope, 
-        #     application_file=self.settings.system.application_file,
-        #     hfw=900e-6
-        # )
+        milling.setup_milling(
+            self.microscope, 
+            application_file=self.settings.system.application_file,
+            hfw=900e-6
+        )
 
         # calibration
         self.calibrated_state = None
-
-
 
     def setup_connections(self):
 
@@ -88,8 +84,7 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         self.checkBox_profile_rotate.toggled.connect(self.update_ui_display)
 
         # combobox
-        milling_currents = [20e-12, 60e-12, 0.74e-9, 5.6e-9, 24e-9, 60e-9, 200e-9, 500e-9] # TODO; get actual currents from microscope
-        # milling_currents = [current for current in self.microscope.beams.ion_beam.beam_current.available_values()]
+        milling_currents = [current for current in self.microscope.beams.ion_beam.beam_current.available_values]
         self.comboBox_milling_current.addItems([f"{current:.3e}" for current in milling_currents])
         self.comboBox_milling_current.currentTextChanged.connect(self.update_ui)
 
@@ -171,7 +166,6 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
 
         napari.utils.notifications.show_info(f"Configuration saved successfully ({config_filename}).")
 
-
     def update_config_from_ui(self):
 
         protocol = {}
@@ -197,8 +191,6 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         return protocol
        
     def update_ui_from_config(self):
-
-        logging.info("update ui from config")
 
         try:
             # system
@@ -240,7 +232,7 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         
         if self.calibrated_state is None:
             napari.utils.notifications.show_warning(f"Unable to move to {chip_location.name}. Please set the TopLeft calibrated position in the calibration tab.")
-            # return
+            return
 
         # chip dimensions
         chip_width = self.settings.protocol["chip"]["width"]
@@ -248,7 +240,7 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
 
 
         # move to top left corner
-        # calibration.set_microscope_state(self.microscope, self.calibrated_state)    
+        calibration.set_microscope_state(self.microscope, self.calibrated_state)    
     
         # top left: nothing
         if chip_location is ChipLocation.TopLeft:
@@ -271,42 +263,38 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
             dx, dy = chip_width / 2, chip_height / 2
 
         # relative stage move
-        stage_position = StagePosition(x=dx, y=dy)
-        # self.microscope.specimen.stage.relative_move(stage_position)
+        stage_position = StagePosition(x=dx, y=-dy)
+        self.microscope.specimen.stage.relative_move(stage_position)
 
         # TODO: check if this is required / works. think we can just use above
         # movement.move_stage_relative_with_corrected_movement(self.microscope, self.settings, dx=dx, dy=dy, beam_type=BeamType.ION)
 
         logging.info(f"Location: {chip_location.name}. movement: {stage_position}")
 
-
         # TODO: edge detection
         # TODO: offset movements
+        # TODO: imaging in napari
 
     def move_to_milling_angle(self):
-
-        logging.info("move to milling angle")  
+        pass 
         # movement.move_flat_to_beam(self.microscope, self.settings, beam_type=BeamType.ION)
 
     def run_milling(self):
 
-        logging.info("run milling pressed")
 
         milling_current = float(self.comboBox_milling_current.currentText())
-        # milling.run_milling(self.microscope, milling_current, asynchronous = False)
+        milling.run_milling(self.microscope, milling_current, asynch = False)
         logging.info(f"milling_current: {milling_current}")
-
 
     def update_ui(self):
 
-        logging.info(f"update from: {self.sender()}")
+        # logging.info(f"update from: {self.sender()}")
 
         surface_milling_enabled = self.checkBox_surface_milling.isChecked()
         self.label_milling_surface_depth.setVisible(surface_milling_enabled)
         self.doubleSpinBox_milling_surface_depth.setVisible(surface_milling_enabled)
        
     def update_milling_pattern(self):
-        logging.info(f"updating milling pattern...")
 
         # get transformed profile
         profile = self.apply_transfrom_profile()
@@ -329,8 +317,8 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         surface_depth = self.doubleSpinBox_milling_surface_depth.value() * constants.MICRON_TO_METRE
         surface_milling_enabled = self.checkBox_surface_milling.isChecked()
 
-
-        # self.microscope.patterning.clear_patterns()
+        self.microscope.imaging.set_active_device(BeamType.ION.value)
+        self.microscope.patterning.clear_patterns()
         patterns = []
 
         # surface milling
@@ -349,10 +337,9 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         # display milling time
         # change current before hand
 
-        # estimated_time = sum([pattern.time for pattern in patterns])
-        estimated_time = 987654321
+        estimated_time = sum([pattern.time for pattern in patterns])
+        # estimated_time = 987654321
         self.label_milling_estimated_time.setText(f"Estimated Time: {estimated_time}")
-
 
     def update_ui_display(self):
 
@@ -383,14 +370,13 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
     ### CALIBRATION
     def set_calibrated_state(self):
         logging.info("set calibrated position")
-
-        # self.calibrated_state = calibration.get_current_microscope_state(self.microscope)
+        self.calibrated_state = calibration.get_current_microscope_state(self.microscope)
 
 
     def set_edge_calibration_position(self):
         logging.info(f"set edge calibration position")
 
-        # self.edge_calibration_position = calibration.get_current_microscope_state(self.microscope)
+        self.edge_calibration_position = calibration.get_current_microscope_state(self.microscope)
 
     def update_calibration_milling_pattern(self):
         logging.info(f"update calibration milling pattern")
@@ -398,18 +384,23 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
         n_steps = self.spinBox_calibration_steps.value() 
         depth = self.doubleSpinBox_calibration_depth.value() * constants.MICRON_TO_METRE
         spacing = self.doubleSpinBox_calibration_spacing.value() * constants.MICRON_TO_METRE
+        width = self.doubleSpinBox_calibration_width.value() * constants.MICRON_TO_METRE
+        height = self.doubleSpinBox_calibration_height.value() * constants.MICRON_TO_METRE
+        centre_y = -((n_steps - 1) * (height + spacing)) / 2
 
-        logging.info(f"steps: {n_steps}, depth per step: {depth:.2e}, spacing: {spacing:.2e}")
-        
-        # TODO: set calibration pattern size?
+        logging.info(f"steps: {n_steps}, depth per step: {depth:.2e}, spacing: {spacing:.2e}")     
+
         self.microscope.patterning.clear_patterns()
 
-        mill_settings = MillingSettings(width=10e-6, height=10e-6, depth=depth) 
+        mill_settings = MillingSettings(width=width, height=height, depth=depth, centre_y=centre_y)
         patterns = utils._draw_calibration_patterns(self.microscope, mill_settings, 
                     n_steps=n_steps, offset=spacing)
 
         estimated_time = sum([pattern.time for pattern in patterns])
         self.label_calibration_estimated_time.setText(f"Estimated Time: {estimated_time}")
+
+        # TODO: show time estimate
+        # show run milling button
 
 
 def main():

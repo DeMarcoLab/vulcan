@@ -35,6 +35,8 @@ run milling
 offset movement
 corner edge detection
 
+profile decomposition
+multiple milling stages
 stitching
 
 

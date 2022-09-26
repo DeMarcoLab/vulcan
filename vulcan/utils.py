@@ -8,7 +8,7 @@ import os
 
 from autoscript_sdb_microscope_client import SdbMicroscopeClient
 from enum import Enum
-
+import tifffile as tf
 
 class ChipLocation(Enum):
     Centre = 1
@@ -37,6 +37,14 @@ def transform_profile(arr:np.ndarray, invert: bool = False, transpose: bool = Fa
 
     return arr
 
+def convert_image_to_bitmap(path: Path, fname: str = "pattern.bmp"):
+    
+    # convert image to 24bit uncompressed RGB
+    img = Image.open(path).convert('RGB')
+    img.save(os.path.join(os.path.dirname(path), fname))
+
+    return img
+
 def convert_profile_to_bmp(arr: np.ndarray) -> np.ndarray:
     # scale values to int
     arr = (arr / np.max(arr)) * 255
@@ -47,8 +55,9 @@ def convert_profile_to_bmp(arr: np.ndarray) -> np.ndarray:
 
     return np.array(img)
 
+def convert_tif_to_bmp(path: Path, fname: str = "pattern.bmp"):
+    arr = np.array(tf.imread(path)).astype(np.float32)
 
-def save_profile_to_bmp(arr: np.ndarray, path: Path = "profile.bmp"):
     # scale values to int
     arr = (arr / np.max(arr)) * 255
     arr = arr.astype(np.uint8)
@@ -56,6 +65,19 @@ def save_profile_to_bmp(arr: np.ndarray, path: Path = "profile.bmp"):
     # convert to 24bit uncompressed RGB...
     img = Image.fromarray(arr).convert("RGB")
 
+    # convert to bmp, save
+    os.makedirs(os.path.dirname(path), exist_ok=True)
+    img.save(os.path.join(os.path.dirname(path), "helloworld.bmp"))
+
+
+def save_profile_to_bmp(arr: np.ndarray, path: Path = "profile.bmp"):
+    
+    # scale values to int
+    arr = (arr / np.max(arr)) * 255
+    arr = arr.astype(np.uint8)
+
+    # convert to 24bit uncompressed RGB...
+    img = Image.fromarray(arr).convert("RGB")
 
     # convert to bmp, save
     os.makedirs(os.path.dirname(path), exist_ok=True)
@@ -67,6 +89,7 @@ from fibsem import milling
 def _draw_calibration_patterns(microscope: SdbMicroscopeClient, mill_settings: MillingSettings, n_steps: int = 1 , offset: float = 10e-6) -> list:
     
     patterns = []
+    incremental_depth = mill_settings.depth
 
     for i in range(n_steps):
 
@@ -76,7 +99,7 @@ def _draw_calibration_patterns(microscope: SdbMicroscopeClient, mill_settings: M
         patterns.append(pattern)
 
         # update for next pattern
-        mill_settings.depth += mill_settings.depth
+        mill_settings.depth += incremental_depth
         mill_settings.centre_y = mill_settings.centre_y + mill_settings.height / 2 + offset
 
     return patterns 
