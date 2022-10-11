@@ -42,3 +42,14 @@ parallel and serial milling produce different outcomes
 - why?
 
 q: 58% of 1?
+
+
+
+
+# wiggle wobble
+
+can use reduced area to 'recharge' using the high current ion beam
+then the pattern should be stable and aligned
+
+large area patterns suffer less from local charging
+
