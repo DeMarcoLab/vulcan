@@ -76,6 +76,10 @@ def save_profile_to_bmp(arr: np.ndarray, path: Path = "profile.bmp"):
     arr = (arr / np.max(arr)) * 255
     arr = arr.astype(np.uint8)
 
+    # rescale to 1-255
+    arr = arr + (255 - arr) / 255
+    arr = arr.astype(np.uint8)
+
     # convert to 24bit uncompressed RGB...
     img = Image.fromarray(arr).convert("RGB")
 
