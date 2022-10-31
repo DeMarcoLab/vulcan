@@ -404,11 +404,11 @@ class VulcanUI(VulcanUI.Ui_MainWindow, QtWidgets.QMainWindow):
 
 
 def main():
-    application = QtWidgets.QApplication([])
+
     viewer = napari.Viewer(ndisplay=2)
     vulcan_ui = VulcanUI(viewer=viewer)                                          
     viewer.window.add_dock_widget(vulcan_ui, area='right')                  
-    sys.exit(application.exec_())
+    napari.run()
 
 
 if __name__ == "__main__":
