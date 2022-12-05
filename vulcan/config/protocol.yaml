@@ -1,0 +1,31 @@
+# user config settings
+name: vulcan
+
+resolution: "1536x1024"
+hfw: 150.e-6
+beam_type: "Electron"
+autocontrast: True
+save: False
+gamma: # gamma correction parameters
+  enabled: True
+  min_gamma: 0.15
+  max_gamma: 1.8
+  scale_factor: 0.01
+  threshold: 46 # px
+
+dose_base: 100.e-9 # in s
+n_passes: 50000
+vpd: 0.38 # in um^3 / nC, Xenon @ 30kV
+imaging_current: 20.e-12 # in A
+milling_current: 60.e-9 # in A
+max_hfw: 800.e-6 # in m
+pixel_size: 10.e-9 # in m
+pattern_pixel_size: 0.5e-6 # in m
+position_x: 0. # in m
+position_y: 0. # in m
+invert: False
+send: False
+save_path: recreation_68
+shuffle: True
+
+# TODO: method from average DT or similar?
