@@ -28,9 +28,11 @@ def convert_arr_to_streamfile(profile: np.ndarray,
         logging.error("Pattern height must be less than or equal to 500 um")
         raise ValueError("Pattern height must be less than or equal to 500 um")
 
+
     if protocol_settings.get("invert"):
         profile = profile.max() - profile
         logging.info(f"Profile inverted")
+    profile += 0.1e-6
 
     x, y = create_position_grid(profile=profile, protocol_settings=protocol_settings)
     logging.info(f"Position grid created successfully")
@@ -43,10 +45,13 @@ def convert_arr_to_streamfile(profile: np.ndarray,
     dose_profile = percentage_profile * n_doses
     dt_profile = dose_profile/protocol_settings.get("n_passes")
 
+    scale_factor = 1.2136
     stream_list = []
     for i in range(dt_profile.shape[0]):
         for j in range(dt_profile.shape[1]):
-            stream_list.append([dt_profile[i, j], x[i, j], y[i, j]])
+            if i == 0 and j == 0:
+                print(dt_profile[i, j]/scale_factor, 1)
+            stream_list.append([int(np.round(dt_profile[i, j]/scale_factor)), int(np.round(x[i, j])), int(np.round(y[i, j]))])
     logging.info(f"Stream list created successfully")
 
     if protocol_settings.get("shuffle"):
@@ -57,6 +62,7 @@ def convert_arr_to_streamfile(profile: np.ndarray,
     save_path = protocol_settings.get("save_path")
 
     with open(f"{save_path}.str", "w") as f:
+        # f.write("s16,25ns\n")
         f.write("s16\n")
         f.write(str(int(n_passes))+"\n")
         f.write(str(profile.shape[0]*profile.shape[1])+"\n")
@@ -70,7 +76,7 @@ def convert_arr_to_streamfile(profile: np.ndarray,
 
 def send_to_microscope(filename: str,
                        microscope: SdbMicroscopeClient,
-                       ):
+                       protocol_settings: dict):
 
     microscope = SdbMicroscopeClient()
     microscope.connect("10.0.0.1")
@@ -78,7 +84,10 @@ def send_to_microscope(filename: str,
     microscope.patterning.set_default_beam_type(BeamType.ION)
     microscope.patterning.set_default_application_file("Si")
 
-    microscope.patterning.clear_patterns()
+    microscope.beams.ion_beam.horizontal_field_width.value = utils.calculate_hfw_from_pixel_size(protocol_settings.get("pixel_size"))
+
+    if protocol_settings.get("clear"):
+        microscope.patterning.clear_patterns()
 
     spd = StreamPatternDefinition.load(filename)
     microscope.patterning.create_stream(0, 0, spd)
@@ -98,10 +107,11 @@ def main(experiment_name: str,
     logging.info(f"HFW: {utils.calculate_hfw_from_pixel_size(settings.protocol.get('pixel_size'))}")
 
     profile = np.load(profile_path)
-    streamfile = convert_arr_to_streamfile(profile, settings.protocol)
+    convert_arr_to_streamfile(profile, settings.protocol)
 
     if settings.protocol.get("send"):
-        send_to_microscope(filename=save_filename, microscope=microscope)
+        save_name  = f"{settings.protocol.get('save_path')}.str"
+        send_to_microscope(filename=save_name, microscope=microscope, protocol_settings=settings.protocol)
 
 
 def create_position_grid(profile: np.ndarray, protocol_settings: dict):
@@ -137,13 +147,40 @@ def create_position_grid(profile: np.ndarray, protocol_settings: dict):
     # create the meshgrid
     x, y = np.meshgrid(x, y)
 
+    #TODO: magic number
+    centre_x, centre_y = 2**16/2, 2**16/2
+
+    position_x = protocol_settings.get("position_x")
+    position_y = protocol_settings.get("position_y")
+
+    position_x = np.round(position_x/pixel_size)
+    position_y = np.round(position_y/pixel_size)
+
+    centre_x_adjustment = -np.round((pattern_pixel_size*(x_pixels-1)/2)/pixel_size)
+    centre_y_adjustment = -np.round((pattern_pixel_size*(y_pixels-1)/2)/pixel_size)
+
     # divide the meshgrid by the pixel_size
-    x = np.round(x / pixel_size)
-    y = np.round(y / pixel_size)
+    x = np.round(x / pixel_size) + centre_x + position_x + centre_x_adjustment
+    y = np.round(y / pixel_size) + centre_y + position_y + centre_y_adjustment
 
     return x, y
 
 if __name__ == "__main__":
+    # # profile = np.ones(shape=(201, 201)) * 5.e-6
+    # # np.save("recreation_94.npy", profile)
+
+    # profile = np.load(r'C:\Users\Admin\Github\vulcan\vulcan\profiles\sub_um_str.npy')
+    # print(profile.shape)
+    # import matplotlib.pyplot as plt
+    # profile = profile[:400, :]
+    # # pad profile by 10 % on either side
+    # print(profile.shape)
+    # profile = np.pad(profile, int(profile.shape[0]*0.05), mode="constant", constant_values=0)
+    # # save as sub_um_str_pad.npy
+    # np.save(r'C:\Users\Admin\Github\vulcan\vulcan\profiles\sub_um_str_pad.npy', profile)
+    # plt.imshow(profile)
+    # plt.show()
+
     if len(sys.argv) < 3:
         raise ValueError("Must provide experiement name and profile path")
     if len(sys.argv) == 3:
