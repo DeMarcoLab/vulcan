@@ -134,3 +134,6 @@ dmypy.json
 *.bmp
 *.tif
 .vscode/settings.json
+
+# streamfiles
+*.str

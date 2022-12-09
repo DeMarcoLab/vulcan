@@ -62,6 +62,7 @@ def convert_arr_to_streamfile(profile: np.ndarray,
     n_passes = int(utils.my_floor(dose_profile.min(), -2)/100)
     logging.info(f'Calculated number of passes: {n_passes}')
 
+    n_passes = 1
     dt_profile = dose_profile/n_passes
 
     logging.info(f'Min doses post pass division: {dt_profile.min()}')

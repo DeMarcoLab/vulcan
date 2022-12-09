@@ -24,8 +24,8 @@ pattern_pixel_size: 100.e-9 # in m
 position_x: 0.e-6 # in m
 position_y: 0.e-6 # in m
 invert: True
-send: False
-save_path: recreation_sub_um
+send: True
+save_path: recreation_sub_um_100us
 shuffle: True
 clear: True
 
