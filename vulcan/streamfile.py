@@ -32,7 +32,11 @@ def convert_arr_to_streamfile(profile: np.ndarray,
     if protocol_settings.get("invert"):
         profile = profile.max() - profile
         logging.info(f"Profile inverted")
-    profile += 0.1e-6
+    profile += 0.6e-6
+    # tile profile 4 times
+    tile = 1
+    profile = np.tile(profile, (tile, tile))
+
 
     x, y = create_position_grid(profile=profile, protocol_settings=protocol_settings)
     logging.info(f"Position grid created successfully")
@@ -45,13 +49,37 @@ def convert_arr_to_streamfile(profile: np.ndarray,
     dose_profile = percentage_profile * n_doses
     dt_profile = dose_profile/protocol_settings.get("n_passes")
 
+
     scale_factor = 1.2136
     stream_list = []
+
+    dt_profile /= scale_factor
+
+    logging.info(dt_profile.min())
+    logging.info(dt_profile.max())
+    logging.info(dt_profile.sum())
+
+    round_profile = np.round(dt_profile, -2)
+    logging.info(round_profile.min())
+    logging.info(round_profile.max())
+    logging.info(round_profile.sum())
+
+    round_profile2 = np.round((dt_profile - round_profile), -1)
+    logging.info(dt_profile[0, 0])
+    logging.info(round_profile[0, 0])
+    logging.info(round_profile2[0, 0])
+
+
+    # diff_profile = abs(round_profile - dt_profile)
+    # logging.info(diff_profile.min())
+    # logging.info(diff_profile.max())
+    # logging.info(diff_profile.sum())
+
+
     for i in range(dt_profile.shape[0]):
         for j in range(dt_profile.shape[1]):
-            if i == 0 and j == 0:
-                print(dt_profile[i, j]/scale_factor, 1)
-            stream_list.append([int(np.round(dt_profile[i, j]/scale_factor)), int(np.round(x[i, j])), int(np.round(y[i, j]))])
+            # stream_list.append([int(np.round(dt_profile[i, j]/scale_factor)), int(np.round(x[i, j])), int(np.round(y[i, j]))])
+            stream_list.append([dt_profile[i, j], int(np.round(x[i, j])), int(np.round(y[i, j]))])
     logging.info(f"Stream list created successfully")
 
     if protocol_settings.get("shuffle"):
