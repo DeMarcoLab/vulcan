@@ -173,3 +173,9 @@ def calculate_n_doses(profile: np.ndarray, protocol_settings: dict):
     n_doses = total_volume/vpdb
     logging.info(f"Number of base doses: {int(n_doses):e}")
     return n_doses
+
+def my_ceil(a, precision=0):
+    return np.true_divide(np.ceil(a * 10**precision), 10**precision)
+
+def my_floor(a, precision=0):
+    return np.true_divide(np.floor(a * 10**precision), 10**precision)
