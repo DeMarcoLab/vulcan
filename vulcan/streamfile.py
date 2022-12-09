@@ -16,7 +16,6 @@ def convert_arr_to_streamfile(profile: np.ndarray,
 
     # read in protocol settings
     pixel_size = protocol_settings.get("pattern_pixel_size")
-
     pattern_width = profile.shape[0] * pixel_size
     pattern_height = profile.shape[1] * pixel_size
 
@@ -28,74 +27,77 @@ def convert_arr_to_streamfile(profile: np.ndarray,
         logging.error("Pattern height must be less than or equal to 500 um")
         raise ValueError("Pattern height must be less than or equal to 500 um")
 
-
     if protocol_settings.get("invert"):
         profile = profile.max() - profile
         logging.info(f"Profile inverted")
-    profile += 0.6e-6
-    # tile profile 4 times
-    tile = 1
-    profile = np.tile(profile, (tile, tile))
 
 
     x, y = create_position_grid(profile=profile, protocol_settings=protocol_settings)
     logging.info(f"Position grid created successfully")
 
+    profile += 0.6e-6
     percentage_profile = utils.calculate_percentage_profile(profile)
 
     # calculate parameters
     n_doses = utils.calculate_n_doses(profile=profile, protocol_settings=protocol_settings)
 
+    if protocol_settings.get("scale"):
+        # scale factor accounts for differences in mill time on UI against calculation, for 60nA
+        scale_factor = protocol_settings.get("scale_factor")
+        if scale_factor is not None:
+            logging.info(f"Using scale factor of {scale_factor}")
+            n_doses = int(n_doses / scale_factor)
+            logging.info(f"Scaled doses: {n_doses:e}")
+
+    # calculate n_doses at each point of the profile
     dose_profile = percentage_profile * n_doses
-    dt_profile = dose_profile/protocol_settings.get("n_passes")
 
+    # use the minimum dose to calculate the number of passes
+    minimum_doses = dose_profile.min()
+    logging.info(f'Minimum n doses: {int(minimum_doses)}')
+    maximum_doses = dose_profile.max()
+    logging.info(f'Maximum n doses: {int(maximum_doses)}')
+    
+    # n passes is calculated so as to not over-cut any section
+    n_passes = int(utils.my_floor(dose_profile.min(), -2)/100)
+    logging.info(f'Calculated number of passes: {n_passes}')
 
-    scale_factor = 1.2136
+    dt_profile = dose_profile/n_passes
+
+    logging.info(f'Min doses post pass division: {dt_profile.min()}')
+    logging.info(f'Max doses post pass division: {dt_profile.max()}')
+
+    round_profile = utils.my_floor(dt_profile, -2)/100
+    logging.info(f'Total number of doses: {int(round_profile.sum())}')
+    logging.info(f'Max doses post rounding: {int(round_profile.max())}')
+
     stream_list = []
-
-    dt_profile /= scale_factor
-
-    logging.info(dt_profile.min())
-    logging.info(dt_profile.max())
-    logging.info(dt_profile.sum())
-
-    round_profile = np.round(dt_profile, -2)
-    logging.info(round_profile.min())
-    logging.info(round_profile.max())
-    logging.info(round_profile.sum())
-
-    round_profile2 = np.round((dt_profile - round_profile), -1)
-    logging.info(dt_profile[0, 0])
-    logging.info(round_profile[0, 0])
-    logging.info(round_profile2[0, 0])
-
-
-    # diff_profile = abs(round_profile - dt_profile)
-    # logging.info(diff_profile.min())
-    # logging.info(diff_profile.max())
-    # logging.info(diff_profile.sum())
-
-
     for i in range(dt_profile.shape[0]):
         for j in range(dt_profile.shape[1]):
+            for point in range(int(round_profile[i, j])):
+                # stream_list.append([f'100: {point}', int(np.round(x[i, j])), int(np.round(y[i, j]))])
+                stream_list.append([f'{point} 100', int(np.round(x[i, j])), int(np.round(y[i, j]))])
             # stream_list.append([int(np.round(dt_profile[i, j]/scale_factor)), int(np.round(x[i, j])), int(np.round(y[i, j]))])
-            stream_list.append([dt_profile[i, j], int(np.round(x[i, j])), int(np.round(y[i, j]))])
+            # stream_list.append([int(dt_profile[i, j]), int(np.round(x[i, j])), int(np.round(y[i, j]))])
+    
+    # sort the stream_list by the first value in each list
     logging.info(f"Stream list created successfully")
 
     if protocol_settings.get("shuffle"):
         np.random.shuffle(stream_list)
         logging.info(f"Stream list shuffled")
+    stream_list.sort(key=lambda x: int(x[0].split(" ")[0]))
 
-    n_passes = protocol_settings.get("n_passes")
+    # n_passes = protocol_settings.get("n_passes")
     save_path = protocol_settings.get("save_path")
 
     with open(f"{save_path}.str", "w") as f:
         # f.write("s16,25ns\n")
         f.write("s16\n")
         f.write(str(int(n_passes))+"\n")
-        f.write(str(profile.shape[0]*profile.shape[1])+"\n")
+        f.write(str(int(round_profile.sum()))+"\n")
         for position in stream_list:
-            f.write(f"{position[0]} {position[1]} {position[2]}\n")
+            f.write(f"{position[0].split(' ')[-1]} {position[1]} {position[2]}\n")
 
         logging.info(f"Stream file saved to {save_path}.str")
 

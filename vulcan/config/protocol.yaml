@@ -14,7 +14,7 @@ gamma: # gamma correction parameters
   threshold: 46 # px
 
 dose_base: 100.e-9 # in s
-n_passes: 22
+n_passes: 1
 vpd: 0.38 # in um^3 / nC, Xenon @ 30kV
 imaging_current: 20.e-12 # in A
 milling_current: 60.e-9 # in A
@@ -28,5 +28,8 @@ send: False
 save_path: recreation_sub_um
 shuffle: True
 clear: True
+
+scale: True
+scale_factor: 1.2136
 
 # TODO: method from average DT or similar?
